@@ -15,6 +15,10 @@ import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketServerProtocolHandler;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextWebSocketFrame>{
 	private Logger loger = LogManager.getLogger();
 	private final ChannelGroup group;
@@ -32,8 +36,29 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 			
 			//加入当前, 上线人员推送前端，显示用户列表中去
 			Channel channel = ctx.channel();
-			ChatMessage message = new ChatMessage(null, "");
-			group.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message,SerializerFeature.DisableCircularReferenceDetect)));
+            String token = channel.attr(ChatConstants.CHANNEL_TOKEN_KEY).get();
+            UserInfo online = ChatConstants.onlines.get(token);
+			Map<String,Object> re = new HashMap<>();
+			re.put("aid",online.getPhone());
+			re.put("nickname",online.getPhone());
+			re.put("avatar",online.getHeadImg().replace("resources","static"));
+			re.put("type","self_info");
+			channel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(re,SerializerFeature.DisableCircularReferenceDetect)));
+            Map<String,Object> all = new HashMap<>();
+            all.put("type","friend_list");
+			all.put("list",ChatConstants.onlines.values().stream().map(u->{
+			    Map<String,Object> m = new HashMap<>();
+			    m.put("is_online",1);
+			    m.put("aid",u.getPhone());
+			    m.put("id",u.getId());
+			    m.put("nickname",u.getPhone());
+			    m.put("session_id",u.getPhone());
+			    m.put("avatar",u.getHeadImg().replace("resources","static"));
+			    return m;
+            }).collect(Collectors.toList()));
+			channel.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(all,SerializerFeature.DisableCircularReferenceDetect)));
+			re.put("type","friend_added");
+			group.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(re,SerializerFeature.DisableCircularReferenceDetect)));
 			group.add(channel);
 		}else {
 			super.userEventTriggered(ctx, evt);
@@ -49,6 +74,7 @@ public class TextWebSocketFrameHandler extends SimpleChannelInboundHandler<TextW
 			group.writeAndFlush("OK");
 		}else {
 			ChatMessage message = new ChatMessage(from, msg.text());
+			loger.info("Bordcast ... from :" + token);
 			group.writeAndFlush(new TextWebSocketFrame(JSON.toJSONString(message,SerializerFeature.DisableCircularReferenceDetect)));
 		}
 	}

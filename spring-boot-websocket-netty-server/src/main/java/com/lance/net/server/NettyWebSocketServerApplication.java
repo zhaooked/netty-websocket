@@ -28,7 +28,7 @@ public class NettyWebSocketServerApplication implements CommandLineRunner{
 
 	@Override
 	public void run(String... args) throws Exception {
-		InetSocketAddress address = new InetSocketAddress("127.0.0.1", 9090);
+		InetSocketAddress address = new InetSocketAddress("0.0.0.0", 9090);
 		ChannelFuture future = chatServer.start(address);
 		
 		Runtime.getRuntime().addShutdownHook(new Thread(){

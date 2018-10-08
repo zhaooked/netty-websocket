@@ -31,6 +31,13 @@ public class ChatMessage {
 		this.createTime = new Date();
 	}
 
+	public ChatMessage(UserInfo from,String message,Map<String,UserInfo> to) {
+		this.from = from;
+		this.message = message;
+		this.to = to;
+		this.createTime = new Date();
+	}
+
 	public String getMessage() {
 		return message;
 	}

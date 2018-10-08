@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.lance.net.server.common.ChatConstants;
+import io.netty.channel.ChannelId;
 
 public class UserInfo implements Serializable{
 	private static final long serialVersionUID = 3562768188264006800L;
@@ -19,7 +20,7 @@ public class UserInfo implements Serializable{
 	private String code;
 	
 	private String headImg;
-	
+
 	public UserInfo() {
 		
 	}

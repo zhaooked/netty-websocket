@@ -17,7 +17,6 @@ import io.netty.util.concurrent.ImmediateEventExecutor;
 
 @Component
 public class ChatServer {
-	private final ChannelGroup channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 	private final EventLoopGroup bossGroup = new NioEventLoopGroup();
 	private final EventLoopGroup workGroup = new NioEventLoopGroup();
 	private Channel channel;
@@ -26,7 +25,7 @@ public class ChatServer {
 		ServerBootstrap bootstrap = new ServerBootstrap();
 		bootstrap.group(bossGroup, workGroup)
 				.channel(NioServerSocketChannel.class)
-				.childHandler(new ChatServerInitializer(channelGroup))
+				.childHandler(new ChatServerInitializer(ChatConstants.channelGroup))
 				.option(ChannelOption.SO_BACKLOG, 128)
 				.childOption(ChannelOption.SO_KEEPALIVE, true);
 		
@@ -40,7 +39,7 @@ public class ChatServer {
 			channel.close();
 		}
 		
-		channelGroup.close();
+		ChatConstants.channelGroup.close();
 		workGroup.shutdownGracefully();
 		bossGroup.shutdownGracefully();
 	}

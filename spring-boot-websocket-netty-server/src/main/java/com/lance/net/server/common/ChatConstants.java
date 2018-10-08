@@ -3,6 +3,10 @@ package com.lance.net.server.common;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.netty.channel.Channel;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,14 +18,23 @@ public class ChatConstants {
     public static final AttributeKey<String> CHANNEL_TOKEN_KEY = AttributeKey.valueOf("netty.channel.token");  
 	/**用来保存当前在线人员*/
 	public static Map<String, UserInfo> onlines = new ConcurrentHashMap<>();
+
+	public static Map<String,Channel> onlineChannel = new ConcurrentHashMap<>();
+
+	/**
+	 * 存放Group Channel
+	 */
+	public static final ChannelGroup channelGroup = new DefaultChannelGroup(ImmediateEventExecutor.INSTANCE);
 	
-	public static void addOnlines(String sessionId, UserInfo val) {
-		onlines.putIfAbsent(sessionId, val);
+	public static void addOnlines(String token, UserInfo val,Channel channel) {
+		onlines.putIfAbsent(token, val);
+		onlineChannel.putIfAbsent(token,channel);
 	}
 	
-	public static void removeOnlines(String sessionId) {
-		if(StringUtils.isNotBlank(sessionId) && onlines.containsKey(sessionId)){
-			onlines.remove(sessionId);
+	public static void removeOnlines(String token) {
+		if(StringUtils.isNotBlank(token) && onlines.containsKey(token)){
+			onlines.remove(token);
+			onlineChannel.remove(token);
 		}
 	}
 	
